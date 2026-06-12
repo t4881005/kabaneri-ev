@@ -57,11 +57,15 @@ const row = computed(() => {
   return (
     [...activeTable.value]
       .reverse()
-      .find((r) => game.value >= r.game) ?? activeTable.value[0]
+      .find((r) => game.value >= r.game) ??
+    activeTable.value[0]
   )
 })
-
 const ev = computed(() => {
+  if (!row.value) {
+    return 0
+  }
+
   return row.value[exchange.value]
 })
 
