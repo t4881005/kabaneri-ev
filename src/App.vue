@@ -1,93 +1,83 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import {
-  normalTable,
-  resetTable,
-  throughTable,
-  upperTable,
-  type Exchange,
-} from './data/kabaneri'
+  import { computed, ref, watch } from 'vue'
+  import {
+    normalTable,
+    resetTable,
+    throughTable,
+    upperTable,
+    type Exchange,
+  } from './data/kabaneri'
 
-const game = ref(0)
+  const game = ref(0)
+  const exchange = ref<Exchange>('equal')
 
-const exchange = ref<Exchange>('equal')
+  const isReset = ref(false)
+  const isUpper = ref(false)
+  const isThrough = ref(false)
 
-const isReset = ref(false)
-const isShortened = ref(false)
-const isThrough = ref(false)
+  watch(isReset, (value) => {
+    if (value) {
+      isUpper.value = false
+      isThrough.value = false
+    }
+  })
 
-watch(isReset, (value) => {
-  if (value) {
-    isShortened.value = false
-    isThrough.value = false
-  }
-})
+  watch(isUpper, (value) => {
+    if (value) {
+      isReset.value = false
+      isThrough.value = false
+    }
+  })
 
-watch(isShortened, (value) => {
-  if (value) {
-    isThrough.value = false
-    isReset.value = false
-  }
-})
+  watch(isThrough, (value) => {
+    if (value) {
+      isReset.value = false
+      isUpper.value = false
+    }
+  })
 
-watch(isThrough, (value) => {
-  if (value) {
-    isShortened.value = false
-    isReset.value = false
-  }
-})
+  const activeTable = computed(() => {
+    if (isReset.value) return resetTable
+    if (isUpper.value) return upperTable
+    if (isThrough.value) return throughTable
+    return normalTable
+  })
 
-const activeTable = computed(() => {
-  if (isReset.value) {
-    return resetTable
-  }
+  const row = computed(() => {
+    return [...activeTable.value].reverse().find((r) => game.value >= r.game) ?? activeTable.value[0]
+  })
 
-  if (isShortened.value) {
-    return upperTable
-  }
+  const ev = computed(() => {
+    if (!row.value) return 0
+    return row.value[exchange.value]
+  })
 
-  if (isThrough.value) {
-    return throughTable
-  }
+  const machineRate = computed(() => {
+    return row.value?.machineRate ?? 0
+  })
 
-  return normalTable
-})
+  const hourly = computed(() => {
+    if (!row.value) return 0
 
-const row = computed(() => {
-  return (
-    [...activeTable.value]
-      .reverse()
-      .find((r) => game.value >= r.game) ??
-    activeTable.value[0]
-  )
-})
-const ev = computed(() => {
-  if (!row.value) {
-    return 0
-  }
+    switch (exchange.value) {
+      case 'equal':
+        return row.value.equalHourly
+      case 'fiveSixReplay':
+        return row.value.fiveSixReplayHourly
+      case 'fiveSixCash':
+        return row.value.fiveSixCashHourly
+      case 'fiveSixLimit500':
+        return row.value.fiveSixLimit500Hourly
+    }
+  })
 
-  return row.value[exchange.value]
-})
-
-const judge = computed(() => {
-  if (ev.value >= 5000) {
-    return '🔥 激アツ'
-  }
-
-  if (ev.value >= 3000) {
-    return '👍 かなり打ちたい'
-  }
-
-  if (ev.value >= 1000) {
-    return '⭕ 打ってよい'
-  }
-
-  if (ev.value >= 0) {
-    return '🤔 条件次第'
-  }
-
-  return '❌ 見送り'
-})
+  const judge = computed(() => {
+    if (ev.value >= 5000) return '🔥 激アツ'
+    if (ev.value >= 3000) return '👍 かなり打ちたい'
+    if (ev.value >= 1000) return '⭕ 打ってよい'
+    if (ev.value >= 0) return '🤔 条件次第'
+    return '❌ 見送り'
+  })
 </script>
 
 <template>
@@ -119,12 +109,9 @@ const judge = computed(() => {
         <span class="toggle"></span>
       </label>
 
-      <label
-        class="toggle-row"
-        :class="{ disabled: isReset }"
-      >
+      <label class="toggle-row" :class="{ disabled: isReset }">
         <span>上位後</span>
-        <input v-model="isShortened" type="checkbox" />
+        <input v-model="isUpper" type="checkbox" :disabled="isReset" />
         <span class="toggle"></span>
       </label>
 
@@ -143,13 +130,23 @@ const judge = computed(() => {
     </div>
 
     <div class="result">
+
       <div class="ev">
-        {{ ev.toLocaleString() }} 円
+        {{ ev.toLocaleString() }}円
       </div>
 
       <div class="judge">
         {{ judge }}
       </div>
+
+      <div class="detail">
+        機械割 {{ machineRate }}%
+      </div>
+
+      <div class="detail">
+        時給 {{ hourly.toLocaleString() }}円
+      </div>
+
     </div>
   </div>
 </template>
@@ -170,7 +167,11 @@ body {
     'Segoe UI',
     sans-serif;
 }
-
+.detail {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #ccc;
+}
 .container {
   max-width: 430px;
   min-height: 100vh;

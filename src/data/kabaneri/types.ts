@@ -6,8 +6,15 @@ export type Exchange =
 
 export type KabaneriRow = {
   game: number
+
   equal: number
   fiveSixReplay: number
   fiveSixCash: number
   fiveSixLimit500: number
+
+  machineRate: number
+  equalHourly: number
+  fiveSixReplayHourly: number
+  fiveSixCashHourly: number
+  fiveSixLimit500Hourly: number
 }
