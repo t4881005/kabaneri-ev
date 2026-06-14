@@ -83,39 +83,23 @@
 
 <template>
   <div class="container">
-
-    <div
-      v-if="currentPage === 'menu'"
-      class="menu"
-    >
+    <div v-if="currentPage === 'menu'" class="menu">
       <h1>期待値計算アプリ</h1>
 
-      <button
-        class="machine-button"
-        @click="currentPage = 'kabaneri'"
-      >
+      <button class="machine-button" @click="currentPage = 'kabaneri'">
         スマスロ カバネリ
       </button>
     </div>
 
     <div v-else>
-      <button
-        class="back-button"
-        @click="currentPage = 'menu'"
-      >
+      <button class="back-button" @click="currentPage = 'menu'">
         ← 戻る
       </button>
-
-      <!-- ↓↓↓ここから今のカバネリ画面↓↓↓ -->
 
       <h1>スマスロ カバネリ期待値計算</h1>
 
       <label>現在ゲーム数</label>
-      <input
-        v-model.number="game"
-        type="number"
-        placeholder="ゲーム数を入力"
-      />
+      <input v-model.number="game" type="number" placeholder="ゲーム数を入力" />
 
       <label>交換率</label>
       <select v-model="exchange">
@@ -125,16 +109,38 @@
         <option value="fiveSixLimit500">5.6枚500枚制限</option>
       </select>
 
-      <!-- 今のトグル群 -->
-      <!-- 今の結果表示 -->
+      <div class="switches">
+        <label class="toggle-row">
+          <span>リセット</span>
+          <input v-model="isReset" type="checkbox" />
+          <span class="toggle"></span>
+        </label>
 
-      <!-- ↑↑↑ここまで今のカバネリ画面↑↑↑ -->
+        <label class="toggle-row" :class="{ disabled: isReset }">
+          <span>上位後</span>
+          <input v-model="isUpper" type="checkbox" :disabled="isReset" />
+          <span class="toggle"></span>
+        </label>
 
+        <label class="toggle-row" :class="{ disabled: isReset }">
+          <span>駆け抜け後</span>
+          <input v-model="isThrough" type="checkbox" :disabled="isReset" />
+          <span class="toggle"></span>
+        </label>
+      </div>
+
+      <div class="result">
+        <div class="ev">{{ ev.toLocaleString() }}円</div>
+
+        <div class="judge">{{ judge }}</div>
+
+        <div class="detail">機械割 {{ machineRate }}%</div>
+
+        <div class="detail">時給 {{ hourly.toLocaleString() }}円</div>
+      </div>
     </div>
-
   </div>
 </template>
-
 <style>
 * {
   box-sizing: border-box;
