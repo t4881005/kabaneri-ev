@@ -8,6 +8,7 @@
     type Exchange,
   } from './data/kabaneri'
 
+  const currentPage = ref<'menu' | 'kabaneri'>('menu')
   const game = ref(0)
   const exchange = ref<Exchange>('equal')
 
@@ -82,78 +83,97 @@
 
 <template>
   <div class="container">
-    <h1>スマスロ カバネリ期待値計算</h1>
 
-    <label>現在ゲーム数</label>
-    <input
-      v-model.number="game"
-      type="number"
-      placeholder="ゲーム数を入力"
-    />
+    <div
+      v-if="currentPage === 'menu'"
+      class="menu"
+    >
+      <h1>期待値計算アプリ</h1>
 
-    <label>交換率</label>
-    <select v-model="exchange">
-      <option value="equal">等価</option>
-      <option value="fiveSixReplay">5.6枚再プレイ</option>
-      <option value="fiveSixCash">5.6枚現金</option>
-      <option value="fiveSixLimit500">5.6枚500枚制限</option>
-    </select>
-
-    <div class="switches">
-      <label class="toggle-row">
-        <span>リセット</span>
-          <input
-            v-model="isReset"
-            type="checkbox"
-          />
-        <span class="toggle"></span>
-      </label>
-
-      <label class="toggle-row" :class="{ disabled: isReset }">
-        <span>上位後</span>
-        <input v-model="isUpper" type="checkbox" :disabled="isReset" />
-        <span class="toggle"></span>
-      </label>
-
-      <label
-        class="toggle-row"
-        :class="{ disabled: isReset }"
+      <button
+        class="machine-button"
+        @click="currentPage = 'kabaneri'"
       >
-        <span>駆け抜け後</span>
-        <input
-          v-model="isThrough"
-          type="checkbox"
-          :disabled="isReset"
-        />
-        <span class="toggle"></span>
-      </label>
+        スマスロ カバネリ
+      </button>
     </div>
 
-    <div class="result">
+    <div v-else>
+      <button
+        class="back-button"
+        @click="currentPage = 'menu'"
+      >
+        ← 戻る
+      </button>
 
-      <div class="ev">
-        {{ ev.toLocaleString() }}円
-      </div>
+      <!-- ↓↓↓ここから今のカバネリ画面↓↓↓ -->
 
-      <div class="judge">
-        {{ judge }}
-      </div>
+      <h1>スマスロ カバネリ期待値計算</h1>
 
-      <div class="detail">
-        機械割 {{ machineRate }}%
-      </div>
+      <label>現在ゲーム数</label>
+      <input
+        v-model.number="game"
+        type="number"
+        placeholder="ゲーム数を入力"
+      />
 
-      <div class="detail">
-        時給 {{ hourly.toLocaleString() }}円
-      </div>
+      <label>交換率</label>
+      <select v-model="exchange">
+        <option value="equal">等価</option>
+        <option value="fiveSixReplay">5.6枚再プレイ</option>
+        <option value="fiveSixCash">5.6枚現金</option>
+        <option value="fiveSixLimit500">5.6枚500枚制限</option>
+      </select>
+
+      <!-- 今のトグル群 -->
+      <!-- 今の結果表示 -->
+
+      <!-- ↑↑↑ここまで今のカバネリ画面↑↑↑ -->
 
     </div>
+
   </div>
 </template>
 
 <style>
 * {
   box-sizing: border-box;
+}
+
+.menu {
+  padding-top: 60px;
+}
+
+.machine-button {
+  width: 100%;
+  padding: 24px;
+  margin-top: 20px;
+
+  font-size: 22px;
+  font-weight: bold;
+
+  color: white;
+  background: #ff3b30;
+
+  border: none;
+  border-radius: 18px;
+
+  cursor: pointer;
+}
+
+.machine-button:active {
+  transform: scale(0.98);
+}
+
+.back-button {
+  margin-bottom: 20px;
+  padding: 10px 16px;
+
+  color: white;
+  background: #333;
+
+  border: none;
+  border-radius: 12px;
 }
 
 body {
