@@ -21,6 +21,19 @@ const isReset = ref(false)
 const isUpper = ref(false)
 const isThrough = ref(false)
 
+const isShortened = ref(false)
+const cycle = ref(1)
+
+const blackSmokeSmall = ref(false)
+const blackSmokeLarge = ref(false)
+const himakuLevel3 = ref(false)
+const himakuLevel4 = ref(false)
+const kujiKahou = ref(false)
+const rokkonShojo = ref(false)
+const kaimonCastle = ref(false)
+const redGreenSerif = ref(false)
+const mumyo3 = ref(false)
+
 watch(isReset, (value) => {
   if (value) {
     isUpper.value = false
@@ -92,13 +105,53 @@ const hourly = computed(() => {
   }
 })
 
-const judge = computed(() => {
+const evJudge = computed(() => {
   if (ev.value >= 5000) return '🔥 激アツ'
   if (ev.value >= 3000) return '👍 かなり打ちたい'
   if (ev.value >= 1000) return '⭕ 打ってよい'
   if (ev.value >= 0) return '🤔 条件次第'
 
   return '❌ 見送り'
+})
+
+const hintJudge = computed(() => {
+  if (blackSmokeLarge.value)
+    return '🔥 穢れ解放まで続行推奨'
+
+  if (
+    kujiKahou.value ||
+    rokkonShojo.value ||
+    kaimonCastle.value
+  ) {
+    return '🔥 ボーナス/STまで続行'
+  }
+
+  if (himakuLevel4.value)
+    return '🔥 周期到達まで続行'
+
+  if (isShortened.value) {
+    if (game.value >= 400)
+      return '👍 天井596G狙い'
+
+    if (cycle.value === 1)
+      return '⭕ 1周期目までフォロー'
+
+    if (cycle.value >= 3)
+      return '⭕ 4周期天井狙い'
+  }
+
+  if (himakuLevel3.value)
+    return '⭕ 周期到達まで検討'
+
+  if (
+    blackSmokeSmall.value ||
+    redGreenSerif.value ||
+    mumyo3.value
+  ) {
+    return '🤔 CZ/黒煙示唆で様子見'
+  }
+
+  return ''
 })
 </script>
 
@@ -130,6 +183,76 @@ const judge = computed(() => {
       <option value="fiveSixLimit500">5.6枚500枚制限</option>
     </select>
 
+    <label>現在周期</label>
+
+    <input
+      v-model.number="cycle"
+      type="number"
+      min="1"
+      placeholder="周期を入力"
+    />
+
+    <div class="switches">
+      <label class="toggle-row">
+        <span>短縮状態</span>
+        <input v-model="isShortened" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>黒煙 小</span>
+        <input v-model="blackSmokeSmall" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>黒煙 大</span>
+        <input v-model="blackSmokeLarge" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>皮膜Lv3</span>
+        <input v-model="himakuLevel3" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>皮膜Lv4</span>
+        <input v-model="himakuLevel4" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>くじ果報</span>
+        <input v-model="kujiKahou" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>六根清浄</span>
+        <input v-model="rokkonShojo" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>海門城背景</span>
+        <input v-model="kaimonCastle" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>赤/緑セリフ</span>
+        <input v-model="redGreenSerif" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+
+      <label class="toggle-row">
+        <span>無名3回</span>
+        <input v-model="mumyo3" type="checkbox" />
+        <span class="toggle"></span>
+      </label>
+    </div>
     <div class="switches">
       <label class="toggle-row">
         <span>リセット</span>
@@ -179,7 +302,14 @@ const judge = computed(() => {
       </div>
 
       <div class="judge">
-        {{ judge }}
+        {{ evJudge }}
+      </div>
+
+      <div
+        v-if="hintJudge"
+        class="detail"
+      >
+        {{ hintJudge }}
       </div>
 
       <div class="detail">
